@@ -3,6 +3,7 @@
 import { NextResponse } from 'next/server';
 import { createDirectus, rest, readItems, createItem } from "@directus/sdk";
 
+
 export async function POST(request) {
   try {
     const { name, email, phone, affiliateId, offerId, affiliateLink, apiKey } = await request.json();
@@ -23,6 +24,8 @@ export async function POST(request) {
       return NextResponse.json({ error: "Duplicate email or phone number" }, { status: 400 });
     }
 
+    const UID =  uuidv4(); //GENERATE
+
     // Scalio API call
     const scalioResponse = await fetch(`https://affiliatescfx.scaletrk.com/api/v2/network/tracker/click?api-key=${apiKey}`, {
       method: "POST",
@@ -30,15 +33,17 @@ export async function POST(request) {
       body: new URLSearchParams({
         affiliate_id: affiliateId.toString(),
         offer_id: offerId.toString(),
+        aff_click_id: UID,
       }),
     });
+
 
     if (!scalioResponse.ok) {
       return NextResponse.json({ error: "Scalio API error" }, { status: 500 });
     }
 
-    const scalioData = await scalioResponse.json();
-    const clickId = scalioData?.info?.click_id;
+    //const scalioData = await scalioResponse.json();
+    const clickId = UID;
 
     if (!clickId) {
       return NextResponse.json({ error: "Click ID not found" }, { status: 500 });
