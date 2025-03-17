@@ -1,10 +1,9 @@
-import Header from "@/components/Header"
-import Footer from "@/components/Footer"
-import LeadForm from "@/components/LeadForm"
-import ExplanationBlock from "@/components/ExplanationBlock"
-import { createDirectus, rest, readItems } from "@directus/sdk"
-import { notFound } from "next/navigation"
-
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import LeadForm from "@/components/LeadForm";
+import ExplanationBlock from "@/components/ExplanationBlock";
+import { createDirectus, rest, readItems } from "@directus/sdk";
+import { notFound } from "next/navigation";
 
 export const metadata = {
   title: "Cashback",
@@ -17,67 +16,79 @@ export default async function Page({ params }) {
     },
   }).with(rest());
 
-    const landingPages = await client.request(readItems("landingPages", {
+  const landingPages = await client.request(
+    readItems("landingPages", {
       filter: {
-        slug: { _eq: params.slug }
-      }
-    })); 
+        slug: { _eq: params.slug },
+      },
+    })
+  );
 
-    if(!landingPages[0]) notFound();
+  if (!landingPages[0]) notFound();
 
-    const slug = params?.slug;
+  const slug = params?.slug;
+  const landingPage = landingPages[0];
 
-    const landingPage = landingPages[0]
+  console.log(landingPage);
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header logo={landingPage.logo} title={landingPage?.title} />
       <main className="flex-grow container mx-auto px-4 py-8 items-center flex">
         <div className="grid md:grid-cols-2 gap-8">
-          
-        <div className="flex flex-col justify-center">
-          
-            <LeadForm offerId={landingPage.offerId} affiliateId={landingPage.affiliateId} slug={slug} affiliateUrl={landingPage.affiliateUrl} />
+          <div className="flex flex-col justify-center">
+            <LeadForm
+              offerId={landingPage.offerId}
+              affiliateId={landingPage.affiliateId}
+              slug={slug}
+              successLabel={landingPage.successLabel}
+              affiliateUrl={landingPage.affiliateUrl}
+              formTitle={landingPage.formTitle}
+              nameLabel={landingPage.nameLabel}
+              emailLabel={landingPage.emailLabel}
+              mobileLabel={landingPage.mobileLabel}
+              buttonLabel={landingPage.buttonLabel}
+              submittingLabel={landingPage.submittingLabel}
+              redirectLabel={landingPage.redirectLabel}
+            />
           </div>
           <div className="space-y-6">
-            
             <p className="text-lg text-muted-foreground">
               {landingPage?.description}
             </p>
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
               <ExplanationBlock
-                title="Step 1: Fill the Form"
+                title={landingPage.step1Title}
                 className={" bg-muted-foreground/5"}
-                description="Provide your details in the form to get redirected to the Casino/SportsBook."
+                description={landingPage.step1Description}
               />
               <ExplanationBlock
-                title="Step 2: Register"
+                title={landingPage.step2Title}
                 className={" bg-muted-foreground/5"}
-                description="Create your account at the Casino/SportsBook to participate in the cashback offer."
+                description={landingPage.step2Description}
               />
               <ExplanationBlock
-                title="Step 3: Deposit"
+                title={landingPage.step3Title}
                 className={"bg-blue-radiant text-white"}
-                description="Make your first deposit to start playing and qualify for the cashback."
+                description={landingPage.step3Description}
               />
               <ExplanationBlock
-                title="Step 4: Play"
+                title={landingPage.step4Title}
                 className={"bg-gold-radiant text-white"}
-                description="Enjoy our wide range of games. Your play contributes to your cashback eligibility."
+                description={landingPage.step4Description}
               />
               <div className="md:col-span-2">
                 <ExplanationBlock
-                  title="Step 5: Receive Cashback"
+                  title={landingPage.step5Title}
                   className="bg-green-radiant text-white"
-                  description="In 7 days, receive your cashback via PIX or MBWay."
+                  description={landingPage.step5Description}
                 />
               </div>
             </div>
           </div>
-          
         </div>
       </main>
-      <Footer title={landingPage?.title} />
+      <Footer title={landingPage?.title} disclaimer={landingPage?.disclaimer} />
     </div>
-  )
+  );
 }

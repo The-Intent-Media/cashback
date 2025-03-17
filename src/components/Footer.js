@@ -11,7 +11,7 @@ export default function Footer(props) {
           
         </div>
         <div className="text-xs mt-2">
-          <p>&copy; 2025 Lucky Casino. All rights reserved.</p>
+          <p>{props.disclaimer}</p>
         </div>
       </div>
     </footer>

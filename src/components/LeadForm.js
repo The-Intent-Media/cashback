@@ -1,4 +1,3 @@
-// app/page.js or your component file
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,11 +15,21 @@ const formSchema = z.object({
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" }),
 });
 
-export default function LeadForm(props) {
-  const affiliate_id = props.affiliateId;
-  const offer_id = props.offerId;
+export default function LeadForm({
+  offerId,
+  affiliateId,
+  slug,
+  affiliateUrl,
+  formTitle,
+  successLabel = "Success",
+  nameLabel = "Your Name",
+  emailLabel = "Your Email",
+  mobileLabel = "Your Phone Number",
+  buttonLabel = "Get Started",
+  submittingLabel = "Submitting...",
+  redirectLabel = "Thanks! You'll be redirected to the operator in",
+}) {
   const api_key = "d1105af97f2fe691f71b1efddfac039e59f96f58";
-  const affiliate_link = props.affiliateUrl;
 
   const {
     register,
@@ -31,7 +40,7 @@ export default function LeadForm(props) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
   const [clickId, setClickId] = useState(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -44,12 +53,12 @@ export default function LeadForm(props) {
 
       if (countdown === 0) {
         clearInterval(timer);
-        router.push(`${affiliate_link}${clickId}`);
+        router.push(`${affiliateUrl}${clickId}`);
       }
 
       return () => clearInterval(timer);
     }
-  }, [isSubmitted, countdown, router, affiliate_link, clickId]);
+  }, [isSubmitted, countdown, router, affiliateUrl, clickId]);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -59,9 +68,9 @@ export default function LeadForm(props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          affiliateId: affiliate_id,
-          offerId: offer_id,
-          affiliateLink: affiliate_link,
+          affiliateId,
+          offerId,
+          affiliateLink: affiliateUrl,
           apiKey: api_key,
         }),
       });
@@ -76,11 +85,8 @@ export default function LeadForm(props) {
         setIsSubmitting(false);
         return;
       }
-      
-      //
 
       const responseData = await response.json();
-      console.log(responseData)
       setClickId(responseData.clickId);
       setIsSubmitted(true);
 
@@ -104,25 +110,24 @@ export default function LeadForm(props) {
   if (isSubmitted) {
     return (
       <div className="space-y-4 bg-muted p-6 rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Success</h2>
-        <p>Thanks! You'll be redirected to the operator in {countdown} seconds.</p>
+        <h2 className="text-2xl font-bold mb-4">{successLabel}</h2>
+        <p>{redirectLabel}.</p>
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-muted px-10 lg:mx-10 py-10 rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Sign Up for Cashback now!</h2>
-      {/* ... (rest of the form remains the same) */}
+      <h2 className="text-2xl font-bold mb-4">{formTitle}</h2>
       <div>
-        <Input {...register("name")} placeholder="Your Name" className={errors.email ? "border-red-500 py-4" : "py-6"} />
+        <Input {...register("name")} placeholder={nameLabel} className={errors.name ? "border-red-500 py-4" : "py-6"} />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
       </div>
       <div>
         <Input
           {...register("email")}
           type="email"
-          placeholder="Your Email"
+          placeholder={emailLabel}
           className={errors.email ? "border-red-500 py-4" : "py-6"}
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
@@ -130,13 +135,13 @@ export default function LeadForm(props) {
       <div>
         <Input
           {...register("phone")}
-          placeholder="Your Phone Number"
-          className={errors.email ? "border-red-500 py-4" : "py-6"}
+          placeholder={mobileLabel}
+          className={errors.phone ? "border-red-500 py-4" : "py-6"}
         />
         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
       </div>
       <Button type="submit" disabled={isSubmitting} className="w-full py-6">
-        {isSubmitting ? "Submitting..." : "Get Started"}
+        {isSubmitting ? submittingLabel : buttonLabel}
       </Button>
     </form>
   );
