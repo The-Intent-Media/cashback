@@ -24,7 +24,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Duplicate email or phone number" }, { status: 400 });
     }
 
-    const UID =  uuidv4(); //GENERATE
+    const UID =  uuidv4().replace(/-/gi, ''); //GENERATE
 
     // Scalio API call
     const scalioResponse = await fetch(`https://affiliatescfx.scaletrk.com/api/v2/network/tracker/click?api-key=${apiKey}`, {
