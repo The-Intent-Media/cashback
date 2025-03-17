@@ -1,4 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider"
+import { ModeToggle } from "@/components/switcher";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,10 +21,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+           <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
         {children}
+        <ModeToggle />
+        </ThemeProvider>
       </body>
     </html>
   );

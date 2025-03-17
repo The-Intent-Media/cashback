@@ -3,6 +3,7 @@ import Footer from "@/components/Footer"
 import LeadForm from "@/components/LeadForm"
 import ExplanationBlock from "@/components/ExplanationBlock"
 import { createDirectus, rest, readItems } from "@directus/sdk"
+import { notFound } from "next/navigation"
 
 export default async function Page({ params }) {
   const client = createDirectus("http://0.0.0.0:8055/", {
@@ -18,21 +19,21 @@ export default async function Page({ params }) {
       }
     })); 
 
-    console.log(params.slug)
+    if(!landingPages[0]) notFound();
 
-    console.log("query",landingPages)
+    const slug = params?.slug;
 
     const landingPage = landingPages[0]
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header logo={landingPage.logo}/>
+      <Header logo={landingPage.logo} />
       <main className="flex-grow container mx-auto px-4 py-8 items-center flex">
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <h1 className="text-4xl font-bold text-primary">{landingPage.title}</h1>
+            <h1 className="text-4xl font-bold text-primary">{landingPage?.title}</h1>
             <p className="text-lg text-muted-foreground">
-              {landingPage.description}
+              {landingPage?.description}
             </p>
             <div className="grid grid-cols-2 gap-6">
               <ExplanationBlock
@@ -65,7 +66,7 @@ export default async function Page({ params }) {
             </div>
           </div>
           <div className="flex flex-col justify-center">
-            <LeadForm />
+            <LeadForm offerId={landingPage.offerId} affiliateId={landingPage.affiliateId} slug={slug} affiliateUrl={landingPage.affiliateUrl} />
           </div>
         </div>
       </main>
