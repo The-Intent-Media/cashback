@@ -12,7 +12,6 @@ export default async function Page({ params }) {
     },
   }).with(rest());
 
-  
     const landingPages = await client.request(readItems("landingPages", {
       filter: {
         slug: { _eq: params.slug }
@@ -27,7 +26,7 @@ export default async function Page({ params }) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header logo={landingPage.logo} />
+      <Header logo={landingPage.logo} title={landingPage?.title} />
       <main className="flex-grow container mx-auto px-4 py-8 items-center flex">
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
