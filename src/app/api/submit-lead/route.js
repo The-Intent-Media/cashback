@@ -2,7 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import { createDirectus, rest, readItems, createItem } from "@directus/sdk";
-
+import { v4 as uuidv4 } from 'uuid'; // Import uuidv4
 
 export async function POST(request) {
   try {
