@@ -5,6 +5,11 @@ import ExplanationBlock from "@/components/ExplanationBlock"
 import { createDirectus, rest, readItems } from "@directus/sdk"
 import { notFound } from "next/navigation"
 
+
+export const metadata = {
+  title: "Cashback",
+};
+
 export default async function Page({ params }) {
   const client = createDirectus(process.env.CMS_URL, {
     fetchOptions: {
@@ -29,12 +34,17 @@ export default async function Page({ params }) {
       <Header logo={landingPage.logo} title={landingPage?.title} />
       <main className="flex-grow container mx-auto px-4 py-8 items-center flex">
         <div className="grid md:grid-cols-2 gap-8">
+          
+        <div className="flex flex-col justify-center">
+          
+            <LeadForm offerId={landingPage.offerId} affiliateId={landingPage.affiliateId} slug={slug} affiliateUrl={landingPage.affiliateUrl} />
+          </div>
           <div className="space-y-6">
-            <h1 className="text-4xl font-bold text-primary">{landingPage?.title}</h1>
+            
             <p className="text-lg text-muted-foreground">
               {landingPage?.description}
             </p>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
               <ExplanationBlock
                 title="Step 1: Fill the Form"
                 className={" bg-muted-foreground/5"}
@@ -47,29 +57,27 @@ export default async function Page({ params }) {
               />
               <ExplanationBlock
                 title="Step 3: Deposit"
-                className={"bg-blue-radiant"}
+                className={"bg-blue-radiant text-white"}
                 description="Make your first deposit to start playing and qualify for the cashback."
               />
               <ExplanationBlock
                 title="Step 4: Play"
-                className={"bg-gold-radiant"}
+                className={"bg-gold-radiant text-white"}
                 description="Enjoy our wide range of games. Your play contributes to your cashback eligibility."
               />
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <ExplanationBlock
                   title="Step 5: Receive Cashback"
-                  className="bg-green-radiant"
+                  className="bg-green-radiant text-white"
                   description="In 7 days, receive your cashback via PIX or MBWay."
                 />
               </div>
             </div>
           </div>
-          <div className="flex flex-col justify-center">
-            <LeadForm offerId={landingPage.offerId} affiliateId={landingPage.affiliateId} slug={slug} affiliateUrl={landingPage.affiliateUrl} />
-          </div>
+          
         </div>
       </main>
-      <Footer />
+      <Footer title={landingPage?.title} />
     </div>
   )
 }
