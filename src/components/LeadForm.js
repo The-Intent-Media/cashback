@@ -23,7 +23,7 @@ export default function LeadForm(props) {
   const affiliate_id = props.affiliateId
   const offer_id = props.offerId
   const api_key = "d1105af97f2fe691f71b1efddfac039e59f96f58"
-  const affiliate_link = props.affiliateUrl+"&click_id="
+  const affiliate_link = props.affiliateUrl
   const client = createDirectus(process.env.CMS_URL, {
     fetchOptions: {
       mode: "cors",
