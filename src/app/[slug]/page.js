@@ -6,7 +6,7 @@ import { createDirectus, rest, readItems } from "@directus/sdk"
 import { notFound } from "next/navigation"
 
 export default async function Page({ params }) {
-  const client = createDirectus("http://0.0.0.0:8055/", {
+  const client = createDirectus(process.env.CMS_URL, {
     fetchOptions: {
       mode: "cors",
     },
