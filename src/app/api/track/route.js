@@ -2,6 +2,8 @@ import { createDirectus, rest, readItems, updateItem, authentication } from '@di
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
+
+  console.log("CALLED");
   if (req.method !== 'GET') {
     return NextResponse.json({ message: 'Only GET requests allowed' }, { status: 405 });
   }
@@ -15,10 +17,9 @@ export async function GET(req) {
   }
 
   // Initialize Directus client
-  const client = createDirectus("http://0.0.0.0:8055/")
-    .with(authentication('static', "RQ9PKeQlJJmo3jXhsP55nHCLfYfd1izt"))
+  const client = createDirectus("https://track.betongreen.io/")
     .with(rest());
-
+0
   try {
     // Fetch the lead item based on ClickId
     const leads = await client.request(
@@ -29,10 +30,12 @@ export async function GET(req) {
       })
     );
 
+    console.log("LEADS",leads)
+
     const lead = leads[0];
 
     if (!lead) {
-      return NextResponse.json({ message: 'Lead not found' }, { status: 404 });
+      return NextResponse.json({ message: 'Lead not found' }, { status: 500 });
     }
 
     // Update the lead status

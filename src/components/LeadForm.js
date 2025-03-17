@@ -1,34 +1,26 @@
-"use client"
+// app/page.js or your component file
+"use client";
 
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-
-import { createDirectus, rest, readItems, createItem } from "@directus/sdk"
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Invalid email address" }),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" }),
-})
+});
 
 export default function LeadForm(props) {
-
-  console.log("PROPS",props)
-  const affiliate_id = props.affiliateId
-  const offer_id = props.offerId
-  const api_key = "d1105af97f2fe691f71b1efddfac039e59f96f58"
-  const affiliate_link = props.affiliateUrl
-  const client = createDirectus("https://track.betongreen.io/", {
-    fetchOptions: {
-      mode: "cors",
-    },
-  }).with(rest());
+  const affiliate_id = props.affiliateId;
+  const offer_id = props.offerId;
+  const api_key = "d1105af97f2fe691f71b1efddfac039e59f96f58";
+  const affiliate_link = props.affiliateUrl;
 
   const {
     register,
@@ -36,98 +28,78 @@ export default function LeadForm(props) {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(formSchema),
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [countdown, setCountdown] = useState(5)
-  const [clickId, setClickId] = useState(null)
-  const { toast } = useToast()
-  const router = useRouter()
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const [clickId, setClickId] = useState(null);
+  const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (isSubmitted) {
       const timer = setInterval(() => {
-        setCountdown((prev) => prev - 1)
-      }, 1000)
+        setCountdown((prev) => prev - 1);
+      }, 1000);
 
       if (countdown === 0) {
-        clearInterval(timer)
-        router.push(`${affiliate_link}${clickId}`)
+        clearInterval(timer);
+        router.push(`${affiliate_link}${clickId}`);
       }
 
-      return () => clearInterval(timer)
+      return () => clearInterval(timer);
     }
-  }, [isSubmitted, countdown, router])
+  }, [isSubmitted, countdown, router, affiliate_link, clickId]);
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      // Check for duplicate email
-      const existingLeads = await client.request(readItems("leads", {
-        filter: {
-          _or: [
-            { email: { _eq: data.email } },
-            { phone: { _eq: data.phone } },
-          ],
-        },
-      }));
-
-      if (existingLeads.length > 0) {
-        toast({
-          title: "Duplicate Email",
-          description: "This email is already registered. Please use a different email.",
-          variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
-      }
-
-      const scalioResponse = await fetch(`https://affiliatescfx.scaletrk.com/api/v2/network/tracker/click?api-key=${api_key}`, {
+      const response = await fetch("/api/submit-lead", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          affiliate_id: affiliate_id.toString(),
-          offer_id: offer_id.toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          affiliateId: affiliate_id,
+          offerId: offer_id,
+          affiliateLink: affiliate_link,
+          apiKey: api_key,
         }),
-      })
+      });
 
-      if (!scalioResponse.ok) {
-        throw new Error("Failed to communicate with Scalio API")
-      }
-
-      const scalioData = await scalioResponse.json()
-      const clickID = scalioData?.info?.click_id
-
-      if (clickID) {
-        setClickId(clickID)
-
-        await client.request(createItem("leads", {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          clickId: clickID,
-          status: "lead",
-        }));
-
+      if (!response.ok) {
+        const errorData = await response.json();
         toast({
-          title: "Success!",
-          description: "Your information has been submitted. We'll be in touch soon!",
-        })
-
-        setIsSubmitted(true)
-      } else {
-        throw new Error("Click ID not found")
+          title: "Error",
+          description: errorData.error || "There was a problem submitting your information. Please try again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
       }
+      
+      //
+
+      const responseData = await response.json();
+      console.log(responseData)
+      setClickId(responseData.clickId);
+      setIsSubmitted(true);
+
+      toast({
+        title: "Success!",
+        description: "Your information has been submitted. We'll be in touch soon!",
+      });
+
     } catch (error) {
+      console.error("Form submission error:", error);
       toast({
         title: "Error",
-        description: "There was a problem submitting your information. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (isSubmitted) {
     return (
@@ -135,12 +107,13 @@ export default function LeadForm(props) {
         <h2 className="text-2xl font-bold mb-4">Success</h2>
         <p>Thanks! You'll be redirected to the operator in {countdown} seconds.</p>
       </div>
-    )
+    );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-muted px-10 lg:mx-10 py-10 rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Sign Up for Cashback now!</h2>
+      {/* ... (rest of the form remains the same) */}
       <div>
         <Input {...register("name")} placeholder="Your Name" className={errors.email ? "border-red-500 py-4" : "py-6"} />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
@@ -166,5 +139,5 @@ export default function LeadForm(props) {
         {isSubmitting ? "Submitting..." : "Get Started"}
       </Button>
     </form>
-  )
+  );
 }
