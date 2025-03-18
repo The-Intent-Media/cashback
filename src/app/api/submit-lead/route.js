@@ -42,8 +42,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "Scalio API error" }, { status: 500 });
     }
 
-    //const scalioData = await scalioResponse.json();
-    const clickId = UID;
+    const scalioData = await scalioResponse.json();
+
+    console.log(scalioData)
+
+    const clickId = scalioData.info.click_id;
+    const affClickId = UID;
 
     if (!clickId) {
       return NextResponse.json({ error: "Click ID not found" }, { status: 500 });
@@ -55,10 +59,11 @@ export async function POST(request) {
       email,
       phone,
       clickId,
+      affClickId,
       status: "lead",
     }));
 
-    return NextResponse.json({ clickId, affiliateLink }); // Return clickId and affiliateLink for redirection
+    return NextResponse.json({ affClickId, clickId, affiliateLink }); // Return clickId and affiliateLink for redirection
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

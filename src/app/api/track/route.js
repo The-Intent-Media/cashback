@@ -25,7 +25,7 @@ export async function GET(req) {
     const leads = await client.request(
       readItems('leads', {
         filter: {
-          clickId: { _eq: clickId },
+          affClickId: { _eq: clickId },
         },
       })
     );
